@@ -119,3 +119,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Nodes with elasticsearch to connect
+NODE1 = os.environ.get("NODE1")
+NODE2 = os.environ.get("NODE2")
