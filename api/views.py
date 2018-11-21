@@ -7,7 +7,7 @@ import json
 
 @csrf_exempt
 def index(request, name):
-    if request.method != 'GET':
+    if request.method != 'GET' and request.method != 'POST':
         return HttpResponse("This method is not allowed!\n")
     if name != 'file' and name != 'organism' and name != 'specimen' and name != 'dataset':
         return HttpResponse("This method is not allowed!\n")
