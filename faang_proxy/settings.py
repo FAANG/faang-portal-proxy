@@ -123,3 +123,16 @@ STATIC_URL = '/static/'
 # Nodes with elasticsearch to connect
 NODE1 = os.environ.get("NODE1")
 NODE2 = os.environ.get("NODE2")
+
+# List of universities abbreviations
+UNIVERSITIES = {
+    "ROSLIN": "The Roslin Institute | The University of Edinburgh",
+    "INRA": "French National Institute for Agricultural Research",
+    "WUR": "Wageningen University and Research",
+    "UCD": "University of California, Davis, University of Colorado Denver, University College Dublin",
+    "USU": "Utah State University",
+    "DEDJTR": "Unknown name",
+    "FBN": "Leibniz Institute for Farm Animal Biology",
+    "TAMU": "Texas A&M University, College Station, TX",
+    "UIC": "University of Illinois at Chicago"
+}
