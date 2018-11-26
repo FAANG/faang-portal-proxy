@@ -41,6 +41,8 @@ def detail(request, name, id):
 
 @csrf_exempt
 def get_protocols(request):
+    if request.method != 'GET':
+        return HttpResponse("This method is not allowed!\n")
     es = Elasticsearch([settings.NODE1, settings.NODE2])
     results = es.search(index="specimen", size=100000)
     entries = {}
@@ -52,11 +54,45 @@ def get_protocols(request):
                 name = settings.UNIVERSITIES[parsed[0]]
                 protocol_name = " ".join(parsed[2:-1])
                 date = parsed[-1].split(".")[0]
-                entries.setdefault(key, {"specimen": [], "organism": [], "name": "", "date": "", "protocol_name": ""})
-                entries[key]["specimen"].append(result["_id"])
-                entries[key]["organism"].append(result["_source"]["derivedFrom"])
-                entries[key]['name'] = name
-                entries[key]['date'] = date
+                entries.setdefault(key, {"name": "", "date": "", "protocol_name": "", "key": ""})
+                entries[key]['university_name'] = name
+                entries[key]['protocol_date'] = date
                 entries[key]["protocol_name"] = protocol_name
+                entries[key]["key"] = key
+    results = json.dumps(list(entries.values()))
+    return HttpResponse(results)
+
+
+@csrf_exempt
+def get_protocol_details(request, id):
+    if request.method != 'GET':
+        return HttpResponse("This method is not allowed!\n")
+    es = Elasticsearch([settings.NODE1, settings.NODE2])
+    results = es.search(index="specimen", size=100000)
+    entries = {}
+    for result in results["hits"]["hits"]:
+        if "specimenFromOrganism" in result["_source"] and \
+                id == result['_source']['specimenFromOrganism']['specimenCollectionProtocol']['filename']:
+            key = id
+            url = result['_source']['specimenFromOrganism']['specimenCollectionProtocol']['url']
+            parsed = key.split("_")
+            if parsed[0] in settings.UNIVERSITIES:
+                name = settings.UNIVERSITIES[parsed[0]]
+                protocol_name = " ".join(parsed[2:-1])
+                date = parsed[-1].split(".")[0]
+                entries.setdefault(key, {"specimen": [], "university_name": "", "protocol_date": "",
+                                         "protocol_name": "", "key": "", "url": ""})
+                specimen = {"id": "", "organism_part_cell_type": "", "organism": "", "breed": "", "derived_from": ""}
+                specimen["id"] = result["_id"]
+                specimen["organism_part_cell_type"] = result["_source"]["cellType"]["text"]
+                specimen["organism"] = result["_source"]["organism"]["organism"]["text"]
+                specimen["breed"] = result["_source"]["organism"]["breed"]["text"]
+                specimen["derived_from"] = result["_source"]["derivedFrom"]
+                entries[key]["specimen"].append(specimen)
+                entries[key]['university_name'] = name
+                entries[key]['protocol_date'] = date
+                entries[key]["protocol_name"] = protocol_name
+                entries[key]["key"] = key
+                entries[key]["url"] = url
     results = json.dumps(list(entries.values()))
     return HttpResponse(results)
