@@ -9,7 +9,7 @@ import json
 def index(request, name):
     if request.method != 'GET' and request.method != 'POST':
         return HttpResponse("This method is not allowed!\n")
-    if name != 'file' and name != 'organism' and name != 'specimen' and name != 'dataset':
+    if name != 'file' and name != 'organism' and name != 'specimen' and name != 'dataset' and name != 'experiment':
         return HttpResponse("This method is not allowed!\n")
     size = request.GET.get('size', 10)
     es = Elasticsearch([settings.NODE1, settings.NODE2])
