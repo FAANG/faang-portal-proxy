@@ -129,7 +129,7 @@ UNIVERSITIES = {
     "ROSLIN": "The Roslin Institute | The University of Edinburgh",
     "INRA": "French National Institute for Agricultural Research",
     "WUR": "Wageningen University and Research",
-    "UCD": "University of California, Davis, University of Colorado Denver, University College Dublin",
+    "UCD": "University of California, Davis",
     "USU": "Utah State University",
     "DEDJTR": "Unknown name",
     "FBN": "Leibniz Institute for Farm Animal Biology",
