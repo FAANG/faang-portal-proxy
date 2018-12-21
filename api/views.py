@@ -40,7 +40,7 @@ def detail(request, name, id):
 
 
 @csrf_exempt
-def get_protocols(request):
+def get_samples_protocols(request):
     if request.method != 'GET':
         return HttpResponse("This method is not allowed!\n")
     es = Elasticsearch([settings.NODE1, settings.NODE2])
@@ -70,7 +70,7 @@ def get_protocols(request):
 
 
 @csrf_exempt
-def get_protocol_details(request, id):
+def get_samples_protocol_details(request, id):
     if request.method != 'GET':
         return HttpResponse("This method is not allowed!\n")
     es = Elasticsearch([settings.NODE1, settings.NODE2])
@@ -101,4 +101,32 @@ def get_protocol_details(request, id):
                 entries[key]["key"] = key
                 entries[key]["url"] = url
     results = json.dumps(list(entries.values()))
+    return HttpResponse(results)
+
+
+@csrf_exempt
+def get_files_protocols(request):
+    return_results = {}
+    es = Elasticsearch([settings.NODE1, settings.NODE2])
+    results = es.search(index="experiment", size=100000)
+
+    def expand_object(data):
+        for key in data:
+            if isinstance(data[key], dict):
+                if 'filename' in data[key]:
+                    if data[key]['filename'] != '':
+                        return_results.setdefault(key, {'name': key, 'experimentTarget': [], 'assayType': []})
+                        return_results[key]['experiments'] += 1
+                        return_results[key]['protocols'].setdefault(data[key]['filename'], 0)
+                        return_results[key]['protocols'][data[key]['filename']] += 1
+                        if 'assayType' in data:
+                            print(data['assayType'])
+                        # return_results[key]['experimentTarget'].append(data['experimentTarget'])
+                        # return_results[key]['assayType'].append(data['assayType'])
+                else:
+                    expand_object(data[key])
+
+    for item in results['hits']['hits']:
+        expand_object(item['_source'])
+    results = json.dumps(list(return_results.values()))
     return HttpResponse(results)
