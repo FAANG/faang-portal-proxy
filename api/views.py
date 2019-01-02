@@ -142,31 +142,39 @@ def get_files_protocol_details(request, id):
     es = Elasticsearch([settings.NODE1, settings.NODE2])
     results = es.search(index="experiment", size=100000)
 
-    def expand_object(data, assay='', target=''):
+    def expand_object(data, assay='', target='', accession='', storage='', processing=''):
         for key in data:
             if isinstance(data[key], dict):
                 if 'filename' in data[key]:
                     if data[key]['filename'] != '':
-                        if assay == '' and target == '':
+                        if assay == '' and target == '' and accession == '' and storage == '' and processing == '':
                             data_key = "{}-{}-{}".format(key, data['assayType'], data['experimentTarget'])
+                            data_experiment = "{}|{}|{}".format(data['accession'], data['sampleStorage'],
+                                                                data['sampleStorageProcessing'])
                             if data_key == id:
                                 return_results.setdefault(data_key, {'name': key,
                                                                      'experimentTarget': data['experimentTarget'],
                                                                      'assayType': data['assayType'],
                                                                      'key': data_key,
                                                                      'url': data[key]['url'],
-                                                                     'filename': data[key]['filename']})
+                                                                     'filename': data[key]['filename'],
+                                                                     'experiments': []})
+                                return_results[data_key]['experiments'].append(data_experiment)
                         else:
                             data_key = "{}-{}-{}".format(key, assay, target)
+                            data_experiment = "{}|{}|{}".format(accession, storage, processing)
                             if data_key == id:
                                 return_results.setdefault(data_key, {'name': key,
                                                                      'experimentTarget': target,
                                                                      'assayType': assay,
                                                                      'key': data_key,
                                                                      'url': data[key]['url'],
-                                                                     'filename': data[key]['filename']})
+                                                                     'filename': data[key]['filename'],
+                                                                     'experiments': []})
+                                return_results[data_key]['experiments'].append(data_experiment)
                 else:
-                    expand_object(data[key], data['assayType'], data['experimentTarget'])
+                    expand_object(data[key], data['assayType'], data['experimentTarget'], data['accession'],
+                                  data['sampleStorage'], data['sampleStorageProcessing'])
 
     for item in results['hits']['hits']:
         expand_object(item['_source'])
