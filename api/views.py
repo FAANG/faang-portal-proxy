@@ -3,6 +3,7 @@ from elasticsearch import Elasticsearch
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import json
+from collections import OrderedDict
 
 
 @csrf_exempt
@@ -58,7 +59,7 @@ def get_samples_protocols(request):
                 name = settings.UNIVERSITIES[parsed[0]]
                 protocol_name = " ".join(parsed[2:-1])
                 date = parsed[-1].split(".")[0]
-                entries.setdefault(key, {"name": "", "date": "", "protocol_name": "", "key": "", "protocol_type": ""})
+                entries.setdefault(key, OrderedDict({"university_name": "", "protocol_date": "", "protocol_name": "", "key": "", "protocol_type": ""}.items()))
                 entries[key]['university_name'] = name
                 entries[key]['protocol_date'] = date[0:4]
                 entries[key]["protocol_name"] = protocol_name
@@ -117,16 +118,15 @@ def get_files_protocols(request):
                     if data[key]['filename'] != '' and data[key]['filename'] is not None:
                         if assay == '' and target == '':
                             data_key = "{}-{}-{}".format(key, data['assayType'], data['experimentTarget'])
-                            return_results.setdefault(data_key, {'name': key,
-                                                                 'experimentTarget': data['experimentTarget'],
-                                                                 'assayType': data['assayType'],
-                                                                 'key': data_key})
+                            return_results.setdefault(data_key, OrderedDict({'name': key,
+                                                                             'experimentTarget': data['experimentTarget'],
+                                                                             'assayType': data['assayType'],
+                                                                             'key': data_key}.items()))
                         else:
                             data_key = "{}-{}-{}".format(key, assay, target)
-                            return_results.setdefault(data_key, {'name': key,
-                                                                 'experimentTarget': target,
-                                                                 'assayType': assay,
-                                                                 'key': data_key})
+                            return_results.setdefault(data_key, OrderedDict({'name': key, 'experimentTarget': target,
+                                                                             'assayType': assay,
+                                                                             'key': data_key}.items()))
                 else:
                     expand_object(data[key], data['assayType'], data['experimentTarget'])
 
