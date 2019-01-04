@@ -114,7 +114,7 @@ def get_files_protocols(request):
         for key in data:
             if isinstance(data[key], dict):
                 if 'filename' in data[key]:
-                    if data[key]['filename'] != '':
+                    if data[key]['filename'] != '' and data[key]['filename'] is not None:
                         if assay == '' and target == '':
                             data_key = "{}-{}-{}".format(key, data['assayType'], data['experimentTarget'])
                             return_results.setdefault(data_key, {'name': key,
@@ -146,7 +146,7 @@ def get_files_protocol_details(request, id):
         for key in data:
             if isinstance(data[key], dict):
                 if 'filename' in data[key]:
-                    if data[key]['filename'] != '':
+                    if data[key]['filename'] != '' and data[key]['filename'] is not None:
                         if assay == '' and target == '' and accession == '' and storage == '' and processing == '':
                             data_key = "{}-{}-{}".format(key, data['assayType'], data['experimentTarget'])
                             data_experiment = "{}|{}|{}".format(data['accession'], data['sampleStorage'],
