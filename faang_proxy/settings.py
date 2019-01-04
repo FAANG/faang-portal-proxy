@@ -126,13 +126,23 @@ NODE2 = os.environ.get("NODE2")
 
 # List of universities abbreviations
 UNIVERSITIES = {
-    "ROSLIN": "The Roslin Institute | The University of Edinburgh",
+    "ROSLIN": "Roslin Institute (Edinburgh, UK)",
     "INRA": "French National Institute for Agricultural Research",
     "WUR": "Wageningen University and Research",
-    "UCD": "University of California, Davis",
-    "USU": "Utah State University",
-    "DEDJTR": "Unknown name",
-    "FBN": "Leibniz Institute for Farm Animal Biology",
-    "TAMU": "Texas A&M University, College Station, TX",
-    "UIC": "University of Illinois at Chicago"
+    "UCD": "University of California, Davis (USA)",
+    "USU": "Utah State University (USA)",
+    "DEDJTR": "Department of Economic Development, Jobs, Transport and Resources (Bundoora, Australia)",
+    "FBN": "Leibniz Institute for Farm Animal Biology (Dummerstorf, Germany)",
+    "TAMU": "Texas A&M University",
+    "UIC": "University of Illinois at Chicago (USA)",
+    "ESTEAM": "ESTeam Paris SUD (France)",
+    "ISU": "Iowa State University",
+    "KU": "Konkuk University (Seoul, Korea)",
+    "NUID": "University College Dublin (Dublin, Ireland)",
+    "NMBU": "Norwegian University of Life Sciences (Norway)",
+    "UIUC": "University of Illinois at Urbana–Champaign (USA)",
+    "UD": "University of Delaware (USA)",
+    "UDL": "University of Lleida (Catalonia, Spain)",
+    "ULE": "University of León (León, Spain)",
+    "USDA": "The United States Department of Agriculture",
 }
