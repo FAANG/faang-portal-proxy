@@ -48,7 +48,8 @@ def get_samples_protocols(request):
     results = es.search(index="specimen", size=100000)
     entries = {}
     for result in results["hits"]["hits"]:
-        if "specimenFromOrganism" in result["_source"]:
+        if "specimenFromOrganism" in result["_source"] and \
+                'specimenCollectionProtocol' in result['_source']['specimenFromOrganism']:
             key = result['_source']['specimenFromOrganism']['specimenCollectionProtocol']['filename']
             try:
                 protocol_type = result['_source']['specimenFromOrganism']['specimenCollectionProtocol']['url'].split("/")[5]
@@ -59,7 +60,8 @@ def get_samples_protocols(request):
                 name = settings.UNIVERSITIES[parsed[0]]
                 protocol_name = " ".join(parsed[2:-1])
                 date = parsed[-1].split(".")[0]
-                entries.setdefault(key, OrderedDict({"university_name": "", "protocol_date": "", "protocol_name": "", "key": "", "protocol_type": ""}.items()))
+                entries.setdefault(key, OrderedDict({"university_name": "", "protocol_date": "", "protocol_name": "",
+                                                     "key": "", "protocol_type": ""}.items()))
                 entries[key]['university_name'] = name
                 entries[key]['protocol_date'] = date[0:4]
                 entries[key]["protocol_name"] = protocol_name
