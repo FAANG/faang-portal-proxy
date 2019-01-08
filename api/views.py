@@ -81,6 +81,7 @@ def get_samples_protocol_details(request, id):
     entries = {}
     for result in results["hits"]["hits"]:
         if "specimenFromOrganism" in result["_source"] and \
+                'specimenCollectionProtocol' in result['_source']['specimenFromOrganism'] and \
                 id == result['_source']['specimenFromOrganism']['specimenCollectionProtocol']['filename']:
             key = id
             url = result['_source']['specimenFromOrganism']['specimenCollectionProtocol']['url']
