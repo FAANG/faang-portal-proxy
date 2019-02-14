@@ -26,7 +26,6 @@ def index(request, name):
 
     # Get cache if request goes to file or specimen
     if int(size) == 100000 and query == '':
-        print('here')
         cache_key = "{}_key".format(name)
         cache_time = 86400
         data = cache.get(cache_key)
