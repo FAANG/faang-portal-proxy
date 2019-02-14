@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 
+from decouple import config
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,10 +22,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '(mmyqo94dlfc25abr(upys!(ftly8_bg#-9wq%#36&bo@0#&5*'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', cast=bool, default=False)
 
 ALLOWED_HOSTS = ["*"]
 
@@ -124,25 +126,10 @@ STATIC_URL = '/static/'
 NODE1 = os.environ.get("NODE1")
 NODE2 = os.environ.get("NODE2")
 
-# List of universities abbreviations
-UNIVERSITIES = {
-    "ROSLIN": "Roslin Institute (Edinburgh, UK)",
-    "INRA": "French National Institute for Agricultural Research",
-    "WUR": "Wageningen University and Research",
-    "UCD": "University of California, Davis (USA)",
-    "USU": "Utah State University (USA)",
-    "DEDJTR": "Department of Economic Development, Jobs, Transport and Resources (Bundoora, Australia)",
-    "FBN": "Leibniz Institute for Farm Animal Biology (Dummerstorf, Germany)",
-    "TAMU": "Texas A&M University",
-    "UIC": "University of Illinois at Chicago (USA)",
-    "ESTEAM": "ESTeam Paris SUD (France)",
-    "ISU": "Iowa State University",
-    "KU": "Konkuk University (Seoul, Korea)",
-    "NUID": "University College Dublin (Dublin, Ireland)",
-    "NMBU": "Norwegian University of Life Sciences (Norway)",
-    "UIUC": "University of Illinois at Urbana–Champaign (USA)",
-    "UD": "University of Delaware (USA)",
-    "UDL": "University of Lleida (Catalonia, Spain)",
-    "ULE": "University of León (León, Spain)",
-    "USDA": "The United States Department of Agriculture",
+# Cache options
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": config('CACHE'),
+    }
 }
