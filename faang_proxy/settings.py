@@ -123,8 +123,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # Nodes with elasticsearch to connect
-NODE1 = os.environ.get("NODE1")
-NODE2 = os.environ.get("NODE2")
+NODE1 = config('NODE1')
+NODE2 = config('NODE2')
 
 # Cache options
 CACHES = {
