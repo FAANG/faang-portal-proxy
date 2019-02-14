@@ -3,6 +3,7 @@ from elasticsearch import Elasticsearch
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.core.cache import cache
+import json
 
 
 ALLOWED_INDICES = ['file', 'organism', 'specimen', 'dataset', 'experiment', 'protocol_files', 'protocol_samples']
