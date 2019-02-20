@@ -6,7 +6,8 @@ from django.core.cache import cache
 import json
 
 
-ALLOWED_INDICES = ['file', 'organism', 'specimen', 'dataset', 'experiment', 'protocol_files', 'protocol_samples']
+ALLOWED_INDICES = ['file', 'organism', 'specimen', 'dataset', 'experiment', 'protocol_files', 'protocol_samples',
+                   'article']
 
 
 @csrf_exempt
