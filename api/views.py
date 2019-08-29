@@ -7,7 +7,7 @@ import json
 
 
 ALLOWED_INDICES = ['file', 'organism', 'specimen', 'dataset', 'experiment', 'protocol_files', 'protocol_samples',
-                   'article']
+                   'article', 'protocol_analysis', 'analysis']
 
 
 @csrf_exempt
