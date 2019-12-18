@@ -69,7 +69,7 @@ def detail(request, name, id):
 
 
 def fire_api(request, protocol_type, id):
-    url = f"https://{settings.DATACENTER}.fire.sdo.ebi.ac.uk/fire/public/" \
-          f"faang/ftp/protocols/{protocol_type}/{id}"
+    url = "https://{}.fire.sdo.ebi.ac.uk/fire/public/faang/ftp/protocols/" \
+          "{}/{}".format(settings.DATACENTER, protocol_type, id)
     response = redirect(url)
     return response
