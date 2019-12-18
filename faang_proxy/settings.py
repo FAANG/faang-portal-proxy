@@ -126,6 +126,9 @@ STATIC_URL = '/static/'
 NODE1 = config('NODE1')
 NODE2 = config('NODE2')
 
+# Datacenter for fire api
+DATACENTER = config('DATACENTER')
+
 # Cache options
 CACHES = {
     "default": {

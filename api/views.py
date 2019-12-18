@@ -3,6 +3,7 @@ from elasticsearch import Elasticsearch
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.core.cache import cache
+from django.shortcuts import redirect
 import json
 
 
@@ -65,3 +66,10 @@ def detail(request, name, id):
         results = es.search(index=name, q="alternativeId:{}".format(id),
                             doc_type="_doc")
     return JsonResponse(results)
+
+
+def fire_api(request, protocol_type, id):
+    url = f"https://{settings.DATACENTER}.fire.sdo.ebi.ac.uk/fire/public/" \
+          f"faang/ftp/protocols/{protocol_type}/{id}"
+    response = redirect(url)
+    return response
