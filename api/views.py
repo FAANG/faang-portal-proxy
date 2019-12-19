@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.core.cache import cache
 from django.shortcuts import redirect
+import requests
 import json
 
 
@@ -71,5 +72,7 @@ def detail(request, name, id):
 def fire_api(request, protocol_type, id):
     url = "https://{}.fire.sdo.ebi.ac.uk/fire/public/faang/ftp/protocols/" \
           "{}/{}".format(settings.DATACENTER, protocol_type, id)
-    response = redirect(url)
+    file = requests.get(url).content
+    response = HttpResponse(file, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(id)
     return response
