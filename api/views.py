@@ -1,11 +1,14 @@
+import requests
+import json
+
 from django.http import JsonResponse, HttpResponse
 from elasticsearch import Elasticsearch
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.core.cache import cache
-from django.shortcuts import redirect
-import requests
-import json
+
+from .helpers import generate_df, generate_df_for_breeds
+from .constants import FIELD_NAMES, HUMAN_READABLE_NAMES
 
 
 ALLOWED_INDICES = ['file', 'organism', 'specimen', 'dataset', 'experiment',
@@ -76,3 +79,38 @@ def fire_api(request, protocol_type, id):
     response = HttpResponse(file, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="{}"'.format(id)
     return response
+
+
+def summary_api(request):
+    final_results = ''
+    for item in FIELD_NAMES.keys():
+        data = requests.get(
+            f"https://data.faang.org/api/summary_{item}/summary_{item}").json()
+        data = data['hits']['hits'][0]['_source']
+        results = list()
+        results_faang_only = list()
+        for field_name in FIELD_NAMES[item]:
+            if 'breed' in field_name:
+                tmp, tmp_faang_only = generate_df_for_breeds(
+                    field_name, HUMAN_READABLE_NAMES[field_name], data)
+            else:
+                tmp, tmp_faang_only = generate_df(field_name,
+                                                  HUMAN_READABLE_NAMES[
+                                                      field_name], data)
+            results.append(tmp)
+            results_faang_only.append(tmp_faang_only)
+        final_results += f'<h1>{item.capitalize()} Summary</h1>'
+        final_results += '<br>'
+        final_results += '<h3>FAANG only data</h3>'
+        final_results += '<br>'
+        for table in results_faang_only:
+            final_results += table.to_html(index=False)
+            final_results += '<br>'
+        final_results += '<h3>All data</h3>'
+        final_results += '<br>'
+        for table in results:
+            final_results += table.to_html(index=False)
+            final_results += '<br>'
+        final_results += '<br>'
+        final_results += '<hr>'
+    return HttpResponse(final_results)
