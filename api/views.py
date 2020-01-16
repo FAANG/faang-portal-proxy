@@ -85,7 +85,8 @@ def summary_api(request):
     final_results = ''
     for item in FIELD_NAMES.keys():
         data = requests.get(
-            f"https://data.faang.org/api/summary_{item}/summary_{item}").json()
+            "https://data.faang.org/api/summary_{}/summary_{}".format(
+                item, item)).json()
         data = data['hits']['hits'][0]['_source']
         results = list()
         results_faang_only = list()

@@ -11,7 +11,7 @@ def generate_df(field_name, column_name, data):
     """
     data_all = dict()
     data_faang_only = dict()
-    for name in [field_name, f"{field_name}FAANGOnly"]:
+    for name in [field_name, "{}FAANGOnly".format(field_name)]:
         tmp = data_all if name == field_name else data_faang_only
         for item in data[name]:
             tmp.setdefault(column_name, list())
@@ -34,7 +34,7 @@ def generate_df_for_breeds(field_name, column_name, data):
     """
     data_all = dict()
     data_faang_only = dict()
-    for name in [field_name, f"{field_name}FAANGOnly"]:
+    for name in [field_name, "{}FAANGOnly".format(field_name)]:
         tmp = data_all if name == field_name else data_faang_only
         for item in data[name]:
             for sc_item in item['speciesValue']:
