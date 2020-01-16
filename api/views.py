@@ -100,7 +100,7 @@ def summary_api(request):
                                                       field_name], data)
             results.append(tmp)
             results_faang_only.append(tmp_faang_only)
-        final_results += f'<h1>{item.capitalize()} Summary</h1>'
+        final_results += '<h1>{} Summary</h1>'.format(item.capitalize())
         final_results += '<br>'
         final_results += '<h3>FAANG only data</h3>'
         final_results += '<br>'
