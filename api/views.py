@@ -72,12 +72,30 @@ def detail(request, name, id):
     return JsonResponse(results)
 
 
-def fire_api(request, protocol_type, id):
+def protocols_fire_api(request, protocol_type, id):
     url = "https://{}.fire.sdo.ebi.ac.uk/fire/public/faang/ftp/protocols/" \
           "{}/{}".format(settings.DATACENTER, protocol_type, id)
     file = requests.get(url).content
     response = HttpResponse(file, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="{}"'.format(id)
+    return response
+
+
+def trackhubregistry_fire_api(request, doc_id):
+    url = "https://{}.fire.sdo.ebi.ac.uk/fire/public/faang/ftp/" \
+          "trackhubregistry/{}".format(settings.DATACENTER, doc_id)
+    file = requests.get(url).content
+    response = HttpResponse(file, content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(doc_id)
+    return response
+
+
+def trackhubregistry_with_dirs_fire_api(request, folder, doc_id):
+    url = "https://{}.fire.sdo.ebi.ac.uk/fire/public/faang/ftp/" \
+          "trackhubregistry/{}/{}".format(settings.DATACENTER, folder, doc_id)
+    file = requests.get(url).content
+    response = HttpResponse(file, content_type='text/plain')
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(doc_id)
     return response
 
 
