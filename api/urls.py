@@ -5,7 +5,7 @@ from . import views
 urlpatterns = [
     path('<str:name>/_search/', views.index, name='index'),
     path('<str:name>/<str:id>', views.detail, name='detail'),
-    path('fire_api/trackhubregistry/<str:folder>/<str:doc_id>',
+    path('fire_api/trackhubregistry/{str:genome_id}/<str:folder>/<str:doc_id>',
          views.trackhubregistry_with_dirs_fire_api,
          name='trackhubregistry_with_dirs_fire_api'),
     path('fire_api/trackhubregistry/<str:doc_id>',

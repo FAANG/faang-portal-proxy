@@ -90,9 +90,10 @@ def trackhubregistry_fire_api(request, doc_id):
     return response
 
 
-def trackhubregistry_with_dirs_fire_api(request, folder, doc_id):
+def trackhubregistry_with_dirs_fire_api(request, genome_id, folder, doc_id):
     url = "https://{}.fire.sdo.ebi.ac.uk/fire/public/faang/ftp/" \
-          "trackhubregistry/{}/{}".format(settings.DATACENTER, folder, doc_id)
+          "trackhubregistry/{}/{}/{}".format(settings.DATACENTER, genome_id,
+                                             folder, doc_id)
     file = requests.get(url).content
     response = HttpResponse(file, content_type='text/plain')
     response['Content-Disposition'] = 'attachment; filename="{}"'.format(doc_id)
