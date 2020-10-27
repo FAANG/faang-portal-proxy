@@ -69,6 +69,9 @@ def detail(request, name, id):
     if results['hits']['total'] == 0:
         results = es.search(index=name, q="alternativeId:{}".format(id),
                             doc_type="_doc")
+    if results['hits']['total'] == 0:
+        results = es.search(index=name, q="biosampleId:{}".format(id),
+                            doc_type="_doc")
     return JsonResponse(results)
 
 
