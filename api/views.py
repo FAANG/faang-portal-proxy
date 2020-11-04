@@ -29,6 +29,7 @@ def index(request, name):
     field = request.GET.get('_source', '')
     sort = request.GET.get('sort', '')
     query = request.GET.get('q', '')
+    from_ = request.GET.get('from_', 0)
 
     set_cache = False
     data = None
@@ -47,10 +48,10 @@ def index(request, name):
                 request.body.decode("utf-8")))
         else:
             if query != '':
-                data = es.search(index=name, size=size, _source=field,
+                data = es.search(index=name, from_=from_, size=size, _source=field,
                                  sort=sort, q=query)
             else:
-                data = es.search(index=name, size=size, _source=field,
+                data = es.search(index=name, from_=from_, size=size, _source=field,
                                  sort=sort)
         if set_cache:
             cache.set(cache_key, data, cache_time)
