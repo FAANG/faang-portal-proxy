@@ -30,6 +30,15 @@ def index(request, name):
     sort = request.GET.get('sort', '')
     query = request.GET.get('q', '')
     from_ = request.GET.get('from_', 0)
+    filters = request.GET.get('filters', '{}')
+
+    # generate query for filtering
+    filter_values = []
+    filters = json.loads(filters)
+    for key in filters.keys():
+        filter_values.append({"terms": {key: filters[key]}})
+    if (len(filter_values)):
+        filters = {"query": {"bool": {"must": filter_values}}}
 
     set_cache = False
     data = None
@@ -49,10 +58,10 @@ def index(request, name):
         else:
             if query != '':
                 data = es.search(index=name, from_=from_, size=size, _source=field,
-                                 sort=sort, q=query)
+                                 sort=sort, q=query, body=filters)
             else:
                 data = es.search(index=name, from_=from_, size=size, _source=field,
-                                 sort=sort)
+                                 sort=sort, body=filters)
         if set_cache:
             cache.set(cache_key, data, cache_time)
 
