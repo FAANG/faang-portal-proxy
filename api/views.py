@@ -30,7 +30,8 @@ def index(request, name):
     sort = request.GET.get('sort', '')
     query = request.GET.get('q', '')
     from_ = request.GET.get('from_', 0)
-    filters = request.GET.get('filters', '{}')
+    filters = request.GET.get('filters', '{}')      # Example: {field1: [val1, val2], field2: [val1, val2], ...}
+    aggregations = request.GET.get('aggs', '{}')    # Example: {aggName1: field1, aggName2: field2, ...}
 
     # generate query for filtering
     filter_values = []
@@ -39,6 +40,14 @@ def index(request, name):
         filter_values.append({"terms": {key: filters[key]}})
     if (len(filter_values)):
         filters = {"query": {"bool": {"must": filter_values}}}
+
+    # generate query for aggregations
+    agg_values = []
+    aggregations = json.loads(aggregations)
+    for key in aggregations.keys():
+        agg_values.append({key: {"terms": {"field": aggregations[key]}}})
+    if (len(agg_values)):
+        filters['aggs'] = agg_values
 
     set_cache = False
     data = None
