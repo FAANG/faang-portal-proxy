@@ -42,12 +42,11 @@ def index(request, name):
         filters = {"query": {"bool": {"must": filter_values}}}
 
     # generate query for aggregations
-    agg_values = []
+    agg_values = {}
     aggregations = json.loads(aggregations)
     for key in aggregations.keys():
-        agg_values.append({key: {"terms": {"field": aggregations[key]}}})
-    if (len(agg_values)):
-        filters['aggs'] = agg_values
+        agg_values[key] = {"terms": {"field": aggregations[key]}}
+    filters['aggs'] = agg_values
 
     set_cache = False
     data = None
