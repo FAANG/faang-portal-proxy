@@ -35,17 +35,30 @@ def index(request, name):
 
     # generate query for filtering
     filter_values = []
+    not_filter_values = []
     filters = json.loads(filters)
     for key in filters.keys():
-        filter_values.append({"terms": {key: filters[key]}})
+        if (filters[key][0] != 'false'):
+            filter_values.append({"terms": {key: filters[key]}})
+        else:
+            not_filter_values.append({"terms": {key: ["true"]}})
+    filter_val = {}
     if (len(filter_values)):
-        filters = {"query": {"bool": {"must": filter_values}}}
+        filter_val['must'] = filter_values
+    if (len(not_filter_values)):
+        filter_val['must_not'] = not_filter_values
+    if (len(filter_values) or len(not_filter_values)):
+        filters = {"query": {"bool": filter_val}}
 
     # generate query for aggregations
     agg_values = {}
     aggregations = json.loads(aggregations)
     for key in aggregations.keys():
-        agg_values[key] = {"terms": {"field": aggregations[key]}}
+        agg_values[key] = {"terms": {"field": aggregations[key], "size": 25}} # size determines number of aggregation buckets returned
+        if (key == 'paper_published'):
+            # aggregations for missing paperPublished field
+            agg_values["paper_published_missing"] = {"missing":{"field":"paperPublished"}}
+
     filters['aggs'] = agg_values
 
     set_cache = False
