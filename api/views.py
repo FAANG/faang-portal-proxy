@@ -29,6 +29,41 @@ def index(request, name):
     field = request.GET.get('_source', '')
     sort = request.GET.get('sort', '')
     query = request.GET.get('q', '')
+    from_ = request.GET.get('from_', 0)
+    # Example: {field1: [val1, val2], field2: [val1, val2], ...}
+    filters = request.GET.get('filters', '{}')    
+    # Example: {aggName1: field1, aggName2: field2, ...}  
+    aggregations = request.GET.get('aggs', '{}')    
+
+    # generate query for filtering
+    filter_values = []
+    not_filter_values = []
+    filters = json.loads(filters)
+    for key in filters.keys():
+        if filters[key][0] != 'false':
+            filter_values.append({"terms": {key: filters[key]}})
+        else:
+            not_filter_values.append({"terms": {key: ["true"]}})
+    filter_val = {}
+    if filter_values:
+        filter_val['must'] = filter_values
+    if not_filter_values:
+        filter_val['must_not'] = not_filter_values
+    if filter_val:
+        filters = {"query": {"bool": filter_val}}
+
+    # generate query for aggregations
+    agg_values = {}
+    aggregations = json.loads(aggregations)
+    for key in aggregations.keys():
+        # size determines number of aggregation buckets returned
+        agg_values[key] = {"terms": {"field": aggregations[key], "size": 25}} 
+        if key == 'paper_published':
+            # aggregations for missing paperPublished field
+            agg_values["paper_published_missing"] = {
+                "missing": {"field": "paperPublished"}}
+
+    filters['aggs'] = agg_values
 
     set_cache = False
     data = None
@@ -47,11 +82,11 @@ def index(request, name):
                 request.body.decode("utf-8")))
         else:
             if query != '':
-                data = es.search(index=name, size=size, _source=field,
-                                 sort=sort, q=query)
+                data = es.search(index=name, from_=from_, size=size, _source=field,
+                                 sort=sort, q=query, body=filters)
             else:
-                data = es.search(index=name, size=size, _source=field,
-                                 sort=sort)
+                data = es.search(index=name, from_=from_, size=size, _source=field,
+                                 sort=sort, body=filters)
         if set_cache:
             cache.set(cache_key, data, cache_time)
 
