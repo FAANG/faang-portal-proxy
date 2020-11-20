@@ -30,34 +30,38 @@ def index(request, name):
     sort = request.GET.get('sort', '')
     query = request.GET.get('q', '')
     from_ = request.GET.get('from_', 0)
-    filters = request.GET.get('filters', '{}')      # Example: {field1: [val1, val2], field2: [val1, val2], ...}
-    aggregations = request.GET.get('aggs', '{}')    # Example: {aggName1: field1, aggName2: field2, ...}
+    # Example: {field1: [val1, val2], field2: [val1, val2], ...}
+    filters = request.GET.get('filters', '{}')    
+    # Example: {aggName1: field1, aggName2: field2, ...}  
+    aggregations = request.GET.get('aggs', '{}')    
 
     # generate query for filtering
     filter_values = []
     not_filter_values = []
     filters = json.loads(filters)
     for key in filters.keys():
-        if (filters[key][0] != 'false'):
+        if filters[key][0] != 'false':
             filter_values.append({"terms": {key: filters[key]}})
         else:
             not_filter_values.append({"terms": {key: ["true"]}})
     filter_val = {}
-    if (len(filter_values)):
+    if filter_values:
         filter_val['must'] = filter_values
-    if (len(not_filter_values)):
+    if not_filter_values:
         filter_val['must_not'] = not_filter_values
-    if (len(filter_values) or len(not_filter_values)):
+    if filter_val:
         filters = {"query": {"bool": filter_val}}
 
     # generate query for aggregations
     agg_values = {}
     aggregations = json.loads(aggregations)
     for key in aggregations.keys():
-        agg_values[key] = {"terms": {"field": aggregations[key], "size": 25}} # size determines number of aggregation buckets returned
-        if (key == 'paper_published'):
+        # size determines number of aggregation buckets returned
+        agg_values[key] = {"terms": {"field": aggregations[key], "size": 25}} 
+        if key == 'paper_published':
             # aggregations for missing paperPublished field
-            agg_values["paper_published_missing"] = {"missing":{"field":"paperPublished"}}
+            agg_values["paper_published_missing"] = {
+                "missing": {"field": "paperPublished"}}
 
     filters['aggs'] = agg_values
 
