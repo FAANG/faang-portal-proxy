@@ -1,5 +1,6 @@
 import requests
 import json
+import csv
 
 from django.http import JsonResponse, HttpResponse
 from elasticsearch import Elasticsearch
@@ -16,6 +17,7 @@ ALLOWED_INDICES = ['file', 'organism', 'specimen', 'dataset', 'experiment',
                    'protocol_analysis', 'analysis', 'summary_organism',
                    'summary_specimen', 'summary_dataset', 'summary_file']
 
+ALLOWED_DOWNLOADS = ['file', 'organism', 'specimen', 'dataset']
 
 @csrf_exempt
 def index(request, name):
@@ -92,6 +94,39 @@ def index(request, name):
 
     return JsonResponse(data)
 
+@csrf_exempt
+def download(request, name):
+    if request.method != 'GET':
+        return HttpResponse("This method is not allowed!\n")
+    if name not in ALLOWED_DOWNLOADS:
+        return HttpResponse("This download doesn't exist!\n")
+
+    # Parse request parameters
+    file_format = request.GET.get('file_format', '')
+    # columns = request.GET.get('columns', [])
+    columns = ['biosampleId','sex','organism','breed','standardMet','paperPublished']
+
+    # Get data and return requested format
+    data = es.search(index=name, _source=field)
+    data = data['hits']['hits']
+
+    if (file_format == 'csv'):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="faang_data.csv"'
+        writer = csv.DictWriter(response, fieldnames=columns)
+        writer.writeheader()
+        for row in data:
+            record = {}
+            for col in columns:
+                if (col in row['_source']):
+                    record[col] = row['_source'][col]
+                else:
+                    record[col] = ''
+            writer.writerow(record)
+        return response
+    
+    # elif (file_format == 'txt'):
+    # return JsonResponse(data)
 
 @csrf_exempt
 def detail(request, name, id):
