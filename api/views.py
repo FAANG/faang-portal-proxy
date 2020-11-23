@@ -103,30 +103,61 @@ def download(request, name):
 
     # Parse request parameters
     file_format = request.GET.get('file_format', '')
-    # columns = request.GET.get('columns', [])
-    columns = ['biosampleId','sex','organism','breed','standardMet','paperPublished']
+    field = request.GET.get('_source', '')
+    column_names = request.GET.get('columns', [])
+    sort = request.GET.get('sort', '')
+    filters = request.GET.get('filters', '{}')
+
+    # generate query for filtering
+    filter_values = []
+    not_filter_values = []
+    filters = json.loads(filters)
+    for key in filters.keys():
+        if filters[key][0] != 'false':
+            filter_values.append({"terms": {key: filters[key]}})
+        else:
+            not_filter_values.append({"terms": {key: ["true"]}})
+    filter_val = {}
+    if filter_values:
+        filter_val['must'] = filter_values
+    if not_filter_values:
+        filter_val['must_not'] = not_filter_values
+    if filter_val:
+        filters = {"query": {"bool": filter_val}}
 
     # Get data and return requested format
-    data = es.search(index=name, _source=field)
-    data = data['hits']['hits']
+    es = Elasticsearch([settings.NODE1, settings.NODE2])
+    data = es.search(index=name, _source=field, sort=sort, body=filters, size=100000)
+    records = data['hits']['hits']
 
-    if (file_format == 'csv'):
+    columns = field.split(',')
+    if file_format == 'csv':
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="faang_data.csv"'
         writer = csv.DictWriter(response, fieldnames=columns)
-        writer.writeheader()
-        for row in data:
+        headers = {}
+        i = 0
+        for col in columns:
+            headers[col] = column_names[i]
+            i += 1
+        writer.writerow(headers)
+        for row in records:
             record = {}
             for col in columns:
-                if (col in row['_source']):
-                    record[col] = row['_source'][col]
-                else:
-                    record[col] = ''
+                cols = col.split('.')
+                record[col] = ''
+                source = row['_source']
+                for c in cols:
+                    if  isinstance(source, dict) and c in source.keys():
+                        record[col] = source[c]
+                        source = source[c]
+                    else:
+                        record[col] = ''
+                        break
             writer.writerow(record)
         return response
     
-    # elif (file_format == 'txt'):
-    # return JsonResponse(data)
+    return JsonResponse(data)
 
 @csrf_exempt
 def detail(request, name, id):
