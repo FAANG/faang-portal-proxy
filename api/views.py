@@ -103,6 +103,7 @@ def download(request, name):
 
     # Request params
     SIZE = 1000000
+    SIZE = 25
     file_format = request.GET.get('file_format', '')
     field = request.GET.get('_source', '')
     column_names = request.GET.get('columns', '[]')
@@ -137,7 +138,8 @@ def download(request, name):
 
     # Get records from elasticsearch
     es = Elasticsearch([settings.NODE1, settings.NODE2])
-    data = es.search(index=name, _source=request_fields, sort=sort, body=filters, size=SIZE)
+    data = es.search(index=name, _source=request_fields, sort=sort, 
+                     body=filters, size=SIZE)
     records = data['hits']['hits']
 
     # generate response payload
@@ -179,13 +181,14 @@ def download(request, name):
     else:
         # add padding to align with max length data in a column
         def space(i, d):
-            max_len = len(max(list(zip(*new_data))[i], key=len))
+            max_len = len(max(list(zip(*row_data))[i], key=len))
             return d+b' '*(max_len-len(d))
 
         # create fixed width and '|' separated tabular text file
         data = response.content
-        new_data = [i.split(b',') for i in filter(None, data.split(b'\n'))]
-        tab_data = b'\n'.join(b' | '.join(space(*c) for c in enumerate(b)) for b in new_data)
+        row_data = [i.split(b',') for i in filter(None, data.split(b'\n'))]
+        align = [b' | '.join(space(*c) for c in enumerate(b)) for b in row_data]
+        tab_data = b'\n'.join(align)
         response.content = tab_data
         return response
 
