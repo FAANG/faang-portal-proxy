@@ -101,7 +101,8 @@ def download(request, name):
     if name not in ALLOWED_DOWNLOADS:
         return HttpResponse("This download doesn't exist!\n")
 
-    # Parse request parameters
+    # Request params
+    SIZE = 1000000
     file_format = request.GET.get('file_format', '')
     field = request.GET.get('_source', '')
     column_names = request.GET.get('columns', '[]')
@@ -134,38 +135,59 @@ def download(request, name):
     if filter_val:
         filters = {"query": {"bool": filter_val}}
 
-    # Get data and return requested format
+    # Get records from elasticsearch
     es = Elasticsearch([settings.NODE1, settings.NODE2])
-    data = es.search(index=name, _source=request_fields, sort=sort, body=filters, size=1000000)
+    data = es.search(index=name, _source=request_fields, sort=sort, body=filters, size=SIZE)
     records = data['hits']['hits']
 
+    # generate response payload
     if file_format == 'csv':
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="faang_data.csv"'
-        writer = csv.DictWriter(response, fieldnames=columns)
-        headers = {}
-        i = 0
+        filename = 'faang_data.csv'
+        content_type = 'text/csv'
+    else:
+        filename = 'faang_data.txt'
+        content_type = 'text/plain'
+    response = HttpResponse(content_type=content_type)
+    response['Content-Disposition'] = 'attachment; filename=' + filename
+
+    # generate csv data
+    writer = csv.DictWriter(response, fieldnames=columns)
+    headers = {}
+    i = 0
+    for col in columns:
+        headers[col] = column_names[i]
+        i += 1
+    writer.writerow(headers)
+    for row in records:
+        record = {}
         for col in columns:
-            headers[col] = column_names[i]
-            i += 1
-        writer.writerow(headers)
-        for row in records:
-            record = {}
-            for col in columns:
-                cols = col.split('.')
-                record[col] = ''
-                source = row
-                for c in cols:
-                    if  isinstance(source, dict) and c in source.keys():
-                        record[col] = source[c]
-                        source = source[c]
-                    else:
-                        record[col] = ''
-                        break
-            writer.writerow(record)
+            cols = col.split('.')
+            record[col] = ''
+            source = row
+            for c in cols:
+                if  isinstance(source, dict) and c in source.keys():
+                    record[col] = source[c]
+                    source = source[c]
+                else:
+                    record[col] = ''
+                    break
+        writer.writerow(record)
+        
+    # return formatted data
+    if file_format == 'csv':
         return response
-    
-    return JsonResponse(data)
+    else:
+        # add padding to align with max length data in a column
+        def space(i, d):
+            max_len = len(max(list(zip(*new_data))[i], key=len))
+            return d+b' '*(max_len-len(d))
+
+        # create fixed width and '|' separated tabular text file
+        data = response.content
+        new_data = [i.split(b',') for i in filter(None, data.split(b'\n'))]
+        tab_data = b'\n'.join(b' | '.join(space(*c) for c in enumerate(b)) for b in new_data)
+        response.content = tab_data
+        return response
 
 @csrf_exempt
 def detail(request, name, id):
