@@ -104,9 +104,18 @@ def download(request, name):
     # Parse request parameters
     file_format = request.GET.get('file_format', '')
     field = request.GET.get('_source', '')
-    column_names = request.GET.get('columns', [])
+    column_names = request.GET.get('columns', '[]')
     sort = request.GET.get('sort', '')
     filters = request.GET.get('filters', '{}')
+    
+    columns = field.split(',')
+    request_fields = []
+    for col in columns:
+        cols = col.split('.')
+        if cols[0] == '_source':
+            request_fields.append('.'.join(cols[1:]))
+    request_fields = ','.join(request_fields)
+    column_names = json.loads(column_names)
 
     # generate query for filtering
     filter_values = []
@@ -127,10 +136,9 @@ def download(request, name):
 
     # Get data and return requested format
     es = Elasticsearch([settings.NODE1, settings.NODE2])
-    data = es.search(index=name, _source=field, sort=sort, body=filters, size=100000)
+    data = es.search(index=name, _source=request_fields, sort=sort, body=filters, size=1000000)
     records = data['hits']['hits']
 
-    columns = field.split(',')
     if file_format == 'csv':
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="faang_data.csv"'
@@ -146,7 +154,7 @@ def download(request, name):
             for col in columns:
                 cols = col.split('.')
                 record[col] = ''
-                source = row['_source']
+                source = row
                 for c in cols:
                     if  isinstance(source, dict) and c in source.keys():
                         record[col] = source[c]
