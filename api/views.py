@@ -103,7 +103,6 @@ def download(request, name):
 
     # Request params
     SIZE = 1000000
-    SIZE = 25
     file_format = request.GET.get('file_format', '')
     field = request.GET.get('_source', '')
     column_names = request.GET.get('columns', '[]')
