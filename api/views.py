@@ -185,7 +185,7 @@ def download(request, name):
 
         # create fixed width and '|' separated tabular text file
         data = response.content
-        row_data = [i.split(b',') for i in filter(None, data.split(b'\n'))]
+        row_data = [i.rstrip(b'\r\n').split(b',') for i in filter(None, data.split(b'\n'))]
         align = [b' | '.join(space(*c) for c in enumerate(b)) for b in row_data]
         tab_data = b'\n'.join(align)
         response.content = tab_data
