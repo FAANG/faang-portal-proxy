@@ -113,7 +113,12 @@ def detail(request, name, id):
 def protocols_fire_api(request, protocol_type, id):
     url = "https://{}.fire.sdo.ebi.ac.uk/fire/public/faang/ftp/protocols/" \
           "{}/{}".format(settings.DATACENTER, protocol_type, id)
-    file = requests.get(url).content
+    r = requests.get(url)
+    if r.status_code != 404:
+        file = r.content
+    else:
+        url = 'https://api.faang.org/protocols/{}/{}'.format(protocol_type, id)
+        file = requests.get(url).content
     response = HttpResponse(file, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="{}"'.format(id)
     return response
